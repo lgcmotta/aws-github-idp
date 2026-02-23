@@ -1,3 +1,18 @@
+terraform {
+  required_version = ">= 1.10"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.33"
+    }
+  }
+  backend "s3" {
+    bucket = var.aws.bucket
+    key    = var.aws.key
+    region = var.aws.region
+  }
+}
+
 data "aws_caller_identity" "this" {}
 
 data "tls_certificate" "this" {
@@ -7,7 +22,7 @@ data "tls_certificate" "this" {
 
 resource "aws_iam_openid_connect_provider" "this" {
   url             = var.github.url
-  client_id_list  = ["sts.amazonaws.com"]
+  client_id_list  = [var.github.url]
   thumbprint_list = data.tls_certificate.this[0].certificates[*].sha1_fingerprint
 }
 
@@ -26,9 +41,8 @@ module "github_roles" {
   url          = var.github.url
   name         = each.value["name"]
   matcher      = each.value["matcher"]
-  repositories = try(each.value["repositories"], each.value["projects"], [])
+  repositories = try(each.value["repositories"], [])
   branches     = try(each.value["branches"], [])
   tags         = try(each.value["tags"], [])
-  environments = try(each.value["environments"], [])
   statements   = try(each.value["statements"], [])
 }
