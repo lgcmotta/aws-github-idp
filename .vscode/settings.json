@@ -1,0 +1,10 @@
+{
+  "yaml.validate": true,
+  "yaml.schemas": {
+    "/Users/motta/.vscode/extensions/continue.continue-1.0.19-darwin-arm64/config-yaml-schema.json": [
+      ".continue/**/*.yaml"
+    ],
+    ".schemas/role.schema.json": ["roles/**/*.yml", "roles/**/*.yaml"],
+    "file:///Users/motta/repos/lgcmotta/github-identity-provider/.schemas/role.schema.json": "file:///Users/motta/repos/lgcmotta/github-identity-provider/roles/mottaflix.yml"
+  }
+}

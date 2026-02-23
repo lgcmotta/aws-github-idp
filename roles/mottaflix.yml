@@ -1,0 +1,72 @@
+name: "Mottaflix"
+repositories:
+  - "lgcmotta/mottaflix-ai"
+matcher: "StringLike"
+branches:
+  - "*"
+tags:
+  - "*"
+environments:
+  - "*"
+statements:
+  - sid: "TofuStateBucketReadList"
+    effect: "Allow"
+    actions:
+      - "s3:ListBucket"
+      - "s3:GetBucketLocation"
+      - "s3:GetBucketVersioning"
+    resources:
+      - "arn:aws:s3:::motta-iac"
+    conditions:
+      - matcher: "StringLike"
+        variable: "s3:prefix"
+        values:
+          - "iac/dev/mottaflix"
+          - "iac/dev/mottaflix/*"
+
+  - sid: "TofuStateObjectsReadWrite"
+    effect: "Allow"
+    actions:
+      - "s3:GetObject"
+      - "s3:PutObject"
+      - "s3:DeleteObject"
+    resources:
+      - "arn:aws:s3:::motta-iac/iac/dev/mottaflix/*"
+
+  - sid: "LightsailFullManagementForIac"
+    effect: "Allow"
+    actions:
+      - "lightsail:*"
+    resources:
+      - "*"
+
+  - sid: "Route53LookupAndRecordManagement"
+    effect: "Allow"
+    actions:
+      - "route53:ListHostedZones"
+      - "route53:ListHostedZonesByName"
+      - "route53:GetHostedZone"
+      - "route53:ListResourceRecordSets"
+      - "route53:ChangeResourceRecordSets"
+      - "route53:GetChange"
+    resources:
+      - "*"
+
+  - sid: "StsCallerIdentity"
+    effect: "Allow"
+    actions:
+      - "sts:GetCallerIdentity"
+    resources:
+      - "*"
+
+  - sid: "AllowCreateLightsailServiceLinkedRoleIfNeeded"
+    effect: "Allow"
+    actions:
+      - "iam:CreateServiceLinkedRole"
+    resources:
+      - "*"
+    conditions:
+      - matcher: "StringEquals"
+        variable: "iam:AWSServiceName"
+        values:
+          - "lightsail.amazonaws.com"

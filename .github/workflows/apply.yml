@@ -1,0 +1,62 @@
+name: Apply IAM OIDC Roles
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*.*.*"
+    branches:
+      - main
+    paths:
+      - ".github/workflows/apply.yml"
+      - ".schemas/**"
+      - "modules/**"
+      - "roles/**"
+      - "*.tf"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: iam-apply-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  TF_IN_AUTOMATION: "true"
+  TF_INPUT: "false"
+  TF_VAR_aws: ${{ vars.TF_VAR_AWS }}
+  TF_VAR_github: ${{ vars.TF_VAR_GITHUB }}
+
+jobs:
+  apply:
+    name: OpenTofu Apply
+    runs-on: ubuntu-latest
+    environment: development
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: 1.11.5
+          tofu_wrapper: false
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION != '' && vars.AWS_REGION || 'us-east-1' }}
+
+      - name: OpenTofu init
+        run: tofu init -input=false
+
+      - name: OpenTofu validate
+        run: tofu validate
+
+      - name: OpenTofu apply
+        run: tofu apply -auto-approve -input=false
