@@ -70,3 +70,32 @@ statements:
         variable: "iam:AWSServiceName"
         values:
           - "lightsail.amazonaws.com"
+
+  - sid: "EcrAuthAndRepositoryManagement"
+    effect: "Allow"
+    actions:
+      - "ecr:GetAuthorizationToken"
+      - "ecr:CreateRepository"
+      - "ecr:DescribeRepositories"
+      - "ecr:ListTagsForResource"
+      - "ecr:TagResource"
+      - "ecr:UntagResource"
+      - "ecr:PutImageTagMutability"
+      - "ecr:PutImageScanningConfiguration"
+    resources:
+      - "*"
+
+  - sid: "EcrPushAndImageUpdates"
+    effect: "Allow"
+    actions:
+      - "ecr:BatchCheckLayerAvailability"
+      - "ecr:BatchGetImage"
+      - "ecr:CompleteLayerUpload"
+      - "ecr:DescribeImages"
+      - "ecr:GetDownloadUrlForLayer"
+      - "ecr:InitiateLayerUpload"
+      - "ecr:ListImages"
+      - "ecr:PutImage"
+      - "ecr:UploadLayerPart"
+    resources:
+      - "*"
