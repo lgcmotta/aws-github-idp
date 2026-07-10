@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 concurrency:
   group: iam-apply-${{ github.ref }}
@@ -24,25 +25,38 @@ jobs:
     name: OpenTofu Apply
     runs-on: ubuntu-latest
     environment: development
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Setup OpenTofu
-        uses: opentofu/setup-opentofu@v1
+        uses: opentofu/setup-opentofu@v2
         with:
-          tofu_version: 1.11.5
+          tofu_version: 1.12.3
           tofu_wrapper: false
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v5
+        uses: aws-actions/configure-aws-credentials@v6
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ vars.AWS_REGION != '' && vars.AWS_REGION || 'us-east-1' }}
+
+      - name: Download role definitions
+        env:
+          AWS_S3_ROLES_BUCKET_URI: ${{ secrets.AWS_S3_ROLES_BUCKET_URI }}
+        run: |
+          mkdir -p roles
+          find roles -type f -name '*.yml' -delete
+          aws s3 cp "$AWS_S3_ROLES_BUCKET_URI" roles/ --recursive --exclude "*" --include "*.yml"
+
+      - name: OpenTofu format check
+        run: tofu fmt -check -recursive
 
       - name: OpenTofu init
         run: tofu init -input=false

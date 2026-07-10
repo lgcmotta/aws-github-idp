@@ -1,9 +1,9 @@
 terraform {
-  required_version = ">= 1.10"
+  required_version = ">= 1.12"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.33"
+      version = "~> 6.54"
     }
   }
   backend "s3" {
@@ -22,7 +22,7 @@ data "tls_certificate" "this" {
 
 resource "aws_iam_openid_connect_provider" "this" {
   url             = var.github.url
-  client_id_list  = [var.github.url]
+  client_id_list  = ["sts.amazonaws.com"]
   thumbprint_list = data.tls_certificate.this[0].certificates[*].sha1_fingerprint
 }
 
@@ -44,5 +44,6 @@ module "github_roles" {
   repositories = try(each.value["repositories"], [])
   branches     = try(each.value["branches"], [])
   tags         = try(each.value["tags"], [])
+  environments = try(each.value["environments"], [])
   statements   = try(each.value["statements"], [])
 }
