@@ -3,7 +3,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.54"
+      version = ">= 6.61"
     }
   }
   backend "s3" {
@@ -38,9 +38,10 @@ module "github_roles" {
   source       = "./modules/role"
   for_each     = local.roles
   account_id   = data.aws_caller_identity.this.account_id
+  assume_role  = try(each.value["assume_role"], null)
   url          = var.github.url
   name         = each.value["name"]
-  matcher      = each.value["matcher"]
+  matcher      = try(each.value["matcher"], "StringEquals")
   repositories = try(each.value["repositories"], [])
   branches     = try(each.value["branches"], [])
   tags         = try(each.value["tags"], [])

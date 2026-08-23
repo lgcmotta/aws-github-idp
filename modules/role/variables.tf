@@ -3,6 +3,24 @@ variable "account_id" {
   description = "The AWS account id containing GitHub as the IDP"
 }
 
+variable "assume_role" {
+  type = object({
+    principals = list(string)
+    conditions = optional(list(object({
+      matcher  = string
+      values   = list(string)
+      variable = string
+    })), [])
+  })
+  description = "AWS principals and optional conditions allowed to assume this role"
+  default     = null
+
+  validation {
+    condition     = var.assume_role == null ? true : length(var.assume_role.principals) > 0
+    error_message = "The variable \"assume_role.principals\" must contain at least one AWS principal."
+  }
+}
+
 variable "name" {
   type        = string
   description = "Name of the Policy/Role to be assumed"
@@ -57,5 +75,5 @@ variable "statements" {
       variable = string
     })), [])
   }))
-  description = "A list of IAM policy statements to attach to the Web Identity Role"
+  description = "A list of IAM policy statements to attach to the role"
 }
