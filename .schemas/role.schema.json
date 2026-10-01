@@ -133,15 +133,15 @@
           },
           "default": []
         },
-        "statements": {
-          "$ref": "#/$defs/statements"
+        "policies": {
+          "$ref": "#/$defs/policies"
         }
       },
       "required": [
         "name",
         "repositories",
         "matcher",
-        "statements"
+        "policies"
       ]
     },
     "assumeRoleTrust": {
@@ -178,15 +178,41 @@
         "assume_role": {
           "$ref": "#/$defs/assumeRoleTrust"
         },
+        "policies": {
+          "$ref": "#/$defs/policies"
+        }
+      },
+      "required": [
+        "name",
+        "assume_role",
+        "policies"
+      ]
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9+=,.@_-]+$"
+        },
         "statements": {
           "$ref": "#/$defs/statements"
         }
       },
       "required": [
         "name",
-        "assume_role",
         "statements"
       ]
+    },
+    "policies": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/policy"
+      },
+      "maxProperties": 20
     }
   }
 }

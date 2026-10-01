@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "YAML schema for AWS application users",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 49,
+      "pattern": "^[A-Za-z0-9+=,.@_-]+$",
+      "description": "Base name; ApplicationUser and ApplicationRole suffixes fit IAM's 64-character limit."
+    },
+    "policies": {
+      "$ref": "role.schema.json#/$defs/policies"
+    }
+  },
+  "required": ["name", "policies"]
+}

@@ -1,6 +1,6 @@
 locals {
-  policy = var.assume_role == null ? "${var.name}GitHubPolicy" : "${var.name}Policy"
-  role   = var.assume_role == null ? "${var.name}GitHubRole" : "${var.name}Role"
+  policy_prefix = var.assume_role == null ? "${var.name}GitHub" : var.name
+  role          = var.assume_role == null ? "${var.name}GitHubRole" : "${var.name}Role"
 }
 
 data "aws_iam_policy_document" "this" {
@@ -78,8 +78,10 @@ resource "aws_iam_role" "this" {
 }
 
 data "aws_iam_policy_document" "role_policies" {
+  for_each = var.policies
+
   dynamic "statement" {
-    for_each = var.statements
+    for_each = each.value.statements
     content {
       sid       = statement.value.sid
       effect    = statement.value.effect
@@ -98,11 +100,29 @@ data "aws_iam_policy_document" "role_policies" {
 }
 
 resource "aws_iam_policy" "this" {
-  name   = local.policy
-  policy = data.aws_iam_policy_document.role_policies.json
+  for_each = var.policies
+
+  name   = "${local.policy_prefix}${each.value.name}Policy"
+  policy = data.aws_iam_policy_document.role_policies[each.key].json
+
+  lifecycle {
+    create_before_destroy = true
+
+    precondition {
+      condition     = length("${local.policy_prefix}${each.value.name}Policy") <= 128
+      error_message = "Generated IAM policy names must not exceed 128 characters."
+    }
+
+    precondition {
+      condition     = length(jsonencode(jsondecode(data.aws_iam_policy_document.role_policies[each.key].json))) <= 6144
+      error_message = "Each managed policy must fit within 6,144 characters. Split oversized groups into smaller policies."
+    }
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "this" {
-  policy_arn = aws_iam_policy.this.arn
+  for_each = var.policies
+
+  policy_arn = aws_iam_policy.this[each.key].arn
   role       = aws_iam_role.this.name
 }

@@ -32,6 +32,11 @@ locals {
     for file in local.role_files :
     replace(trimsuffix(file, ".yml"), "/", "_") => yamldecode(file("${path.root}/roles/${file}"))
   }
+  user_files = fileset("${path.root}/users", "**/*.yml")
+  users = {
+    for file in local.user_files :
+    replace(trimsuffix(file, ".yml"), "/", "_") => yamldecode(file("${path.root}/users/${file}"))
+  }
 }
 
 module "github_roles" {
@@ -46,5 +51,14 @@ module "github_roles" {
   branches     = try(each.value["branches"], [])
   tags         = try(each.value["tags"], [])
   environments = try(each.value["environments"], [])
-  statements   = try(each.value["statements"], [])
+  policies     = each.value["policies"]
+}
+
+module "users" {
+  source   = "./modules/user"
+  for_each = local.users
+
+  account_id = data.aws_caller_identity.this.account_id
+  name       = each.value["name"]
+  policies   = each.value["policies"]
 }

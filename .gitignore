@@ -47,3 +47,7 @@ out
 
 # roles
 roles/*.yml
+
+# Application user definitions
+users/**/*.yml
+users/**/*.yaml

@@ -55,6 +55,14 @@ jobs:
           find roles -type f -name '*.yml' -delete
           aws s3 cp "$AWS_S3_ROLES_BUCKET_URI" roles/ --recursive --exclude "*" --include "*.yml"
 
+      - name: Download users definitions
+        env:
+          AWS_S3_USERS_BUCKET_URI: ${{ secrets.AWS_S3_USERS_BUCKET_URI }}
+        run: |
+          mkdir -p users
+          find users -type f -name '*.yml' -delete
+          aws s3 cp "$AWS_S3_USERS_BUCKET_URI" users/ --recursive --exclude "*" --include "*.yml"
+
       - name: OpenTofu format check
         run: tofu fmt -check -recursive
 

@@ -1,6 +1,7 @@
 {
   "yaml.validate": true,
   "yaml.schemas": {
-    ".schemas/role.schema.json": ["roles/**/*.yml", "roles/**/*.yaml"]
+    ".schemas/role.schema.json": ["roles/**/*.yml", "roles/**/*.yaml"],
+    ".schemas/user.schema.json": ["users/**/*.yml", "users/**/*.yaml"]
   }
 }
